@@ -8,7 +8,7 @@ class KeicyFireStoreDataProvider {
   static KeicyFireStoreDataProvider _instance = KeicyFireStoreDataProvider();
   static KeicyFireStoreDataProvider get instance => _instance;
 
-  Future<dynamic> addDocument({@required String path, @required Map<String, dynamic> data}) async {
+  Future<Map<String, dynamic>> addDocument({@required String path, @required Map<String, dynamic> data}) async {
     try {
       final ref = await Firestore.instance.collection(path).add(data);
       if (ref != null) {
@@ -19,15 +19,15 @@ class KeicyFireStoreDataProvider {
           data: {'id': ref.documentID},
         );
         if (res) {
-          return data;
+          return {"state": true, "data": data};
         } else {
-          return '-1';
+          return {"state": false};
         }
       }
     } catch (e) {
       print("____________ firebase addDocument error ____________");
       print(e);
-      return '-1';
+      return {"state": false};
     }
   }
 
@@ -64,29 +64,34 @@ class KeicyFireStoreDataProvider {
     }
   }
 
-  Future getDocumentByID({@required String path, @required String id}) async {
+  Future<Map<String, dynamic>> getDocumentByID({@required String path, @required String id}) async {
     try {
       DocumentSnapshot documentSnapshot = await Firestore.instance.collection(path).document(id).get();
       Map<String, dynamic> data = documentSnapshot.data;
       data["id"] = documentSnapshot.documentID;
-      return data;
+      return {"state": true, "data": data};
     } catch (e) {
       print("____________ firebase getDocumentByID error ____________");
       print(e);
-      return '-1';
+      return {"state": false};
     }
   }
 
   Stream<Map<String, dynamic>> getDocumentStreamByID({@required String path, @required String id}) {
-    Stream<DocumentSnapshot> stream = Firestore.instance.collection(path).document(id).snapshots();
-    return stream.map((documentSnapshot) {
-      Map<String, dynamic> data = documentSnapshot.data;
-      data["id"] = documentSnapshot.documentID;
-      return data;
-    });
+    try {
+      Stream<DocumentSnapshot> stream = Firestore.instance.collection(path).document(id).snapshots();
+      return stream.map((documentSnapshot) {
+        Map<String, dynamic> data = documentSnapshot.data;
+        data["id"] = documentSnapshot.documentID;
+        return data;
+      });
+    } catch (e) {
+      return null;
+    }
   }
 
-  Future getDocumentData({@required String path, List<Map<String, dynamic>> wheres, List<Map<String, dynamic>> orderby, int limit}) async {
+  Future<Map<String, dynamic>> getDocumentData(
+      {@required String path, List<Map<String, dynamic>> wheres, List<Map<String, dynamic>> orderby, int limit}) async {
     CollectionReference ref;
     Query query;
     try {
@@ -102,11 +107,11 @@ class KeicyFireStoreDataProvider {
         tmp["id"] = snapshot.documents.elementAt(i).documentID;
         data.add(tmp);
       }
-      return data;
+      return {"state": true, "data": data};
     } catch (e) {
       print("____________ firebase getDocumentData error ____________");
       print(e);
-      return '-1';
+      return {"state": false};
     }
   }
 
@@ -176,7 +181,7 @@ class KeicyFireStoreDataProvider {
             print(e);
           }
 
-          return data;
+          return {"state": true, "data": data};
         }));
       });
 
@@ -184,7 +189,7 @@ class KeicyFireStoreDataProvider {
       for (var i = 0; i < parentSnapshot.documents.length; i++) {}
     } catch (e) {
       print("getDocument Error : $e");
-      return '-1';
+      return {"state": false};
     }
   }
 
