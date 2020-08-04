@@ -34,7 +34,7 @@ class KeicyAuthentication implements _BaseAuth {
   Future<Map<String, dynamic>> signIn({@required String email, @required String password}) async {
     try {
       FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password)).user;
-      return {"state": "success", "user": user};
+      return {"state": true, "user": user};
     } catch (e) {
       List<String> list = e.toString().split(RegExp(r'(PlatformException\()|(FirebaseError)|([(:,.)])'));
 
@@ -51,7 +51,7 @@ class KeicyAuthentication implements _BaseAuth {
       ///   --- Error Codes ---
       /// ERROR_USER_NOT_FOUND, ERROR_WRONG_PASSWORD,ERROR_NETWORK_REQUEST_FAILED
       ///
-      return {"state": "fail", "errorCode": errorCode, "errorString": errorString};
+      return {"state": false, "errorCode": errorCode, "errorString": errorString};
     }
   }
 
@@ -70,7 +70,7 @@ class KeicyAuthentication implements _BaseAuth {
   Future<Map<String, dynamic>> signUp({@required String email, @required String password}) async {
     try {
       FirebaseUser user = (await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password)).user;
-      return {"state": "success", "user": user};
+      return {"state": true, "user": user};
     } catch (e) {
       List<String> list = e.toString().split(RegExp(r'(PlatformException\()|(FirebaseError)|([(:,.)])'));
 
@@ -87,7 +87,7 @@ class KeicyAuthentication implements _BaseAuth {
       ///   --- Error Codes ---
       /// ERROR_EMAIL_ALREADY_IN_USE, ERROR_NETWORK_REQUEST_FAILED,
       ///
-      return {"state": "fail", "errorCode": errorCode, "errorString": errorString};
+      return {"state": false, "errorCode": errorCode, "errorString": errorString};
     }
   }
 
